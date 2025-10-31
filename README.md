@@ -5,8 +5,36 @@
 
 <img width="900" height="730" alt="image" src="https://github.com/user-attachments/assets/a93be0ba-4a35-4ce0-b10f-9183099587a8" />
 
+# Installation:
 
-## How to Use
+## Requirements
+Python 3+
+
+## How to install
+
+[Download the latest version](https://github.com/CeciliaBot/EpicSevenAssetRipper/releases/latest) and extract all the files in a folder of your choice.
+
+Open the command prompt (hold shift + right click inside the folder -> Power Shell on windows) and type
+
+    pip install -r requirements.txt
+
+This should take care of all the dependencies required
+
+Now you can double click main.py or type py main.py in the command prompt to run the GUI
+
+A folder named data.pack will be created, you can use this folder to organize your files or just ignore it
+
+
+## SCT to PNG
+To use the SCT to PNG 3 additional installations are required
+
+    python3 -m pip install --upgrade Pillow
+
+    python3 -m pip install texture2ddecoder
+
+    python3 -m pip install lz4
+
+# How to Use
 <img width="900" height="730" alt="image" src="https://github.com/user-attachments/assets/00d005f6-f7c7-43db-8258-8ce088d7938d" />
 
 1. Select the data.pack to use (this tool supports data.pack, .tar, .zip (No password)
@@ -15,7 +43,7 @@
 4. (Optional) You can use the compare function to remove unchanged nodes when comparing to older file trees
 
 
-## What's new in 2.0
+# What's new in 2.0
 SCT to PNG is now included, this hook allows to decode and convert sct and sct2 files to png
 
 Multiselect in the file tree: you can hold CTRL + Left click to select different nodes in the file tree view
