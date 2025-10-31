@@ -1,7 +1,13 @@
 **/__pycache__/
 
+.*
+!/.gitignore
+
 .idea/
 .git/
 
+app/hooks/after_write/
+app/hooks/before_write/
 data.pack/
-test/
+crash-report.txt
+settings.ini
