@@ -34,10 +34,17 @@ class CreateTab(QWidget):
 
         ## GITHUB LINK
         github = QLabel(self)
-        github.setText(f'<a href="http://https://github.com/CeciliaBot" style="color: {QApplication.instance().ThemeColors.LINK_FONT_COLOR}">{translate("github_page")}</a>')
+        github.setText(f'<a href="https://github.com/CeciliaBot" style="color: {QApplication.instance().ThemeColors.LINK_FONT_COLOR}">{translate("github_page")}</a>')
         github.setOpenExternalLinks(True)
         vertical_box.addWidget(github)
         vertical_box.setAlignment(github, Qt.AlignmentFlag.AlignCenter)
+
+        ## ICONS
+        picto = QLabel(self)
+        picto.setText(f'Material Design icons by <a href="https://pictogrammers.com/" style="color: {QApplication.instance().ThemeColors.LINK_FONT_COLOR}">pictogrammers</a>')
+        picto.setOpenExternalLinks(True)
+        vertical_box.addWidget(picto)
+        vertical_box.setAlignment(picto, Qt.AlignmentFlag.AlignCenter)
 
         ## UPDATE BUTTON
         check_for_updates = Button(self, text=translate('check_updates'), pointer=True)

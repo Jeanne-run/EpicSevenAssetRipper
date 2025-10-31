@@ -35,12 +35,16 @@ To use the SCT to PNG 3 additional installations are required
     python3 -m pip install lz4
 
 # How to Use
+
+After installing all the requirements open run.bat or run_no_console.vbs (if you don't want the console)
+
 <img width="900" height="730" alt="image" src="https://github.com/user-attachments/assets/00d005f6-f7c7-43db-8258-8ce088d7938d" />
 
 1. Select the data.pack to use (this tool supports data.pack, .tar, .zip (No password)
 2. Generate file tree or load file tree from json file. After generating this tool will automatically save the result to tree.json in the same folder as the data.pack, this tool will also try to automatically load the "tree.json" file in the same directory as the data.pack
 3. All the assets inside the data.pack will now be displayed in the file tree. You can select and right click files to extract or preview. (You can enable automatic preview in the settings tab) Preview is only available for images only as of now.
 4. (Optional) You can use the compare function to remove unchanged nodes when comparing to older file trees
+5. You can enable and disable plugins/hooks by clicking the name at the bottom right of the window
 
 
 # What's new in 2.0
@@ -48,13 +52,15 @@ SCT to PNG is now included, this hook allows to decode and convert sct and sct2 
 
 Multiselect in the file tree: you can hold CTRL + Left click to select different nodes in the file tree view
 
-Reload hooks: Click the small refresh icon at the bottom right to relaod hooks (hooks dependencies wont be reloaded)
+Reload hooks: Click the small refresh icon at the bottom left to relaod hooks (hooks dependencies wont be reloaded)
 
 Settings tab: Here you can change some settings
 
 Light and Dark themes: Improvments to the dark theme and new light theme
 
-## Hooks
+# Hooks
+
+Hooks can be disabled by clicking the Hook's name at the bottom right of the window
 
 You can create your custom hooks to handle different file extensions. This tool provides the SCT to PNG and Webp loop hooks.
 
@@ -69,3 +75,21 @@ def main(file):
   thread = file.thread # -> You can check is_stopping() to check if the proccess was interrupted by the user or call progress((int, str)) NOTE: progress requires a tuple
   written = file.written # -> Check if the file has been written, this should be true if the hook is in the after_write folder
 ```
+
+If you need to update the ui you should first check if the ui is loaded (the tool could be just a cmd or flask server) by checking modules:
+```
+if 'PyQt6' in sys.modules:
+  # The ui was initialized
+  from PyQt6.QtWidgets import QApplication, QWidget
+  app = QApplication.instance()
+  add_setting = app.property('CreateSetting')
+  add_setting(title=f'[<b>My Hook</b>] Setting Title', description='', value=False, type='checkbox', options=[], onchanged=lambda v: print(v))
+else:
+  # No ui
+```
+
+For example the code above will create a new option in the settings tab
+
+Additionally you can have 2 optional methods: onEnabled and onDisabled. These methods are called when the hook is enabled or disabled and they can be used to update ui or cleanup
+
+
