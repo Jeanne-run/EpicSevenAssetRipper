@@ -38,7 +38,9 @@ class AppMainWindow(QMainWindow):
  
         # Get all folders containing a main.py script in the tabs folder and load them
         tabs: list[QWidget] = []
-        py_files = glob.glob(os.path.join('.\\gui\\tabs\\*\\', 'main.py'), include_hidden=True)
+        py_files = glob.glob(os.path.join('gui', 'tabs', '*', 'main.py')) \
+          + glob.glob(os.path.join('gui', 'tabs', '.*', 'main.py'))
+
         for py in py_files:
             path, file = os.path.split(py)
             _, ext = os.path.split(path)
