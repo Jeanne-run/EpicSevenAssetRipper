@@ -2,7 +2,8 @@ from . import settings
 
 LOCALES = [
     'en',
-    'it'
+    'it',
+    'zh_cn'
 ]
 
 STRINGS = {}
@@ -18,6 +19,9 @@ def setLocale(locale: str = LOCALE):
             case 'en':
                 from i18n.en import EN
                 STRINGS = EN
+            case 'zh_cn':
+                from i18n.zh_cn import ZH_CN
+                STRINGS = ZH_CN
             case _:
                 raise Exception()
         LOCALE = locale

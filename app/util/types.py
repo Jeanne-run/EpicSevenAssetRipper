@@ -1,4 +1,15 @@
-from typing import TypedDict, LiteralString, Optional, Self, List, Union
+from typing import TypedDict, Optional, List, Union
+
+try:
+    from typing import LiteralString, Self
+except ImportError:
+    # Python <3.11 fallback definitions
+    LiteralString = str
+    try:
+        from typing_extensions import Self
+    except ImportError:
+        Self = None  # or just object
+
 
 class FileType(TypedDict):
     type: LiteralString = 'file'
