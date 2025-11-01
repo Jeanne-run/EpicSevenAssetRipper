@@ -149,7 +149,7 @@ def load_hooks(gui_create=None):
 
             files = os.listdir(hook_folder_path)
             for file in files:
-                target_extension = re.search("^([^ ]+)\.py$", file)
+                target_extension = re.search(r"^([^ ]+)\.py$", file)
                 if target_extension:
                     ext = target_extension.group(1)
 
