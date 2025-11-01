@@ -1,4 +1,5 @@
-class ZH_CN:
+from .en import EN
+class ZH_CN(EN):
     app_name = 'Epic Seven Asset Ripper'
     check_updates = '检查更新'
     github_page = 'CeciliaBot GitHub'
