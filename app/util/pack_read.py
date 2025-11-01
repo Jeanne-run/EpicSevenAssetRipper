@@ -147,7 +147,7 @@ class EpicSevenDataPack(BasePackIO):
         stop = f.size() - 19
 
         while True:
-            cursor = self.find(b'\x02', f.tell(), stop=stop)
+            cursor = self.find(b'\x02', f.tell(), stop)
 
             if cursor == -1:
                 break
