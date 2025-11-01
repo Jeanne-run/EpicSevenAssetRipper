@@ -54,3 +54,4 @@ class EN:
 
     lang_en = 'English'
     lang_it = 'Italian'
+    lang_zh_cn = 'Chinese (Simplified)'
