@@ -111,10 +111,14 @@ def main(file: FileDescriptor):
                 image_data = decode_etc2a8(data, width, height)
             case 40:
                 image_data = decode_astc(data, width, height, 4, 4)
+            case 44: # face/portrait/30009.sct  face/portrait/20020.sct
+                image_data = decode_astc(data, width, height, 6, 6)
             case 47:
                 image_data = decode_astc(data, width, height, 8, 8)
             case _:
                 raise Exception(f'Unknown SCT2 byte format for file {file.tree_file["full_path"]} byte format f{byte_format}')
+        
+        image = PIL.Image.frombytes('RGBA', (width, height), image_data, 'raw', 'BGRA')
     else:
         match byte_format:
             case 2:
@@ -126,7 +130,6 @@ def main(file: FileDescriptor):
             case _: # czn -> lucas_attack_play2_bg_s.sct [format 102]
                 raise Exception(f'Unknown SCT byte format for file {file.tree_file["full_path"]} byte format {byte_format}')
 
-    image = PIL.Image.frombytes('RGBA', (width, height), image_data, 'raw', 'BGRA')
 
     if dest_path is None:
         file.bytes.clear()
