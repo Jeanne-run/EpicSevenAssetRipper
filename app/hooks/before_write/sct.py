@@ -127,7 +127,10 @@ def main(file: FileDescriptor):
             case 4:
                 image = pil_image_RGB16_A( data, width, height )
 
-            case _: # czn -> lucas_attack_play2_bg_s.sct [format 102]
+            case 102: # czn -> lucas_attack_play2_bg_s.sct
+                image = PIL.Image.frombytes('L', (width, height), data)
+
+            case _: 
                 raise Exception(f'Unknown SCT byte format for file {file.tree_file["full_path"]} byte format {byte_format}')
 
 
