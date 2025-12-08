@@ -3,7 +3,6 @@ from PyQt6.QtCore                 import Qt
 from PyQt6.QtGui                  import QPixmap
 from app.constants                import VERSION
 from app.strings                  import translate
-from app.update                   import update_check
 from gui.components.button        import Button
 from gui.components.update_dialog import UpdateDialog
 
@@ -54,20 +53,12 @@ class CreateTab(QWidget):
         vertical_box.setAlignment(check_for_updates, Qt.AlignmentFlag.AlignCenter)
         self.updates_btn = check_for_updates
 
-
         vertical_box.addStretch()
 
     def check_for_app_updates(self):
         self.updates_btn.setDisabled(True)
-        self.updates_btn.setText(translate('please_wait'))
 
-        updates = update_check()
-
-        if updates and len(updates) > 0:
-            dialog = UpdateDialog(self, updates)
-            dialog.closeEvent = lambda *a: self.updates_btn.setDisabled(False)
-            print('Update found!')
-
-        self.updates_btn.setText(translate('check_updates'))
+        dialog = UpdateDialog(self)
+        dialog.closeEvent = lambda *a: self.updates_btn.setDisabled(False)
 
 

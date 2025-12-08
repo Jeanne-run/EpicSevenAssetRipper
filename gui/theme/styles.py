@@ -68,6 +68,7 @@ class LightTheme:
     INPUT_BORDER_COLOR = BORDER_LIGHT_COLOR
     INPUT_BORDER_WIDTH = 1
     INPUT_BORDER_RADIUS = 6
+    INPUT_DISABLED_FONT_COLOR = 'gray'
 
     PROGRESS_BAR_BACKGROUND = 'transparent'
     PROGRESS_BAR_RADIUS = 0
@@ -190,14 +191,36 @@ class AccentColorDarkTheme(RoundedDarkTheme):
     BUTTON_HOVER_FONT_COLOR = '#ffffff'
     BUTTON_HOVER_BORDER_COLOR = _ACCENT
 
-
-
-
 def apply(theme: LightTheme = AccentColorDarkTheme):
     return f"""
+        QWidget {{
+            color: {theme.FONT_COLOR};
+            border: none;
+            background-color: {theme.BACKGROUND_COLOR};
+        }}
+
+        QToolTip {{
+            color: {theme.FONT_COLOR};
+            border: none;
+            background-color: {theme.BACKGROUND_COLOR};
+        }}
+
+        QGroupBox {{
+            background-color: transparent;
+            border: {theme.INPUT_BORDER_WIDTH}px solid {theme.BORDER_LIGHT_COLOR};
+            border-radius: {theme.BUTTON_RADIUS}px;
+            margin: 0.55em 0 0 0;
+        }}
+
+        QGroupBox::title {{
+            subcontrol-origin: margin;
+            subcontrol-position: top center;
+        }}
+
         QMenu {{
-            background-color: #ABABAB;
-            border: 1px solid black;
+            background-color: {theme.BACKGROUND_COLOR};
+            border: {theme.BUTTON_BORDER_WIDTH}px solid {theme.BUTTON_BORDER_COLOR};
+            color: {theme.BUTTON_FONT_COLOR};
         }}
 
         QMenu::item {{
@@ -206,14 +229,9 @@ def apply(theme: LightTheme = AccentColorDarkTheme):
 
         QMenu::item:selected {{
             background-color: {theme.HOVER_BACKGROUND};
-            color: {theme.HOVER_FONT_COLOR}
+            color: {theme.HOVER_FONT_COLOR};
         }}
 
-        QWidget {{
-            background-color: {theme.BACKGROUND_COLOR};
-            color: {theme.FONT_COLOR};
-            border: none;
-        }}
         QPushButton {{
             background-color: {theme.BUTTON_BACKGROUND_COLOR};
             border: {theme.BUTTON_BORDER_WIDTH}px solid {theme.BUTTON_BORDER_COLOR};
@@ -262,6 +280,9 @@ def apply(theme: LightTheme = AccentColorDarkTheme):
             color: {theme.INPUT_FONT_COLOR};
             border-radius: {theme.INPUT_BORDER_RADIUS};
             padding: 5px;
+        }}
+        QLineEdit:disabled, QTextEdit:disabled, QCheckBox:disabled, QLabel:disabled {{
+            color: {theme.INPUT_DISABLED_FONT_COLOR};
         }}
 
         QProgressBar {{
@@ -357,7 +378,7 @@ def apply(theme: LightTheme = AccentColorDarkTheme):
         
 
         
-        QTreeWidget {{
+        QTreeWidget, QTableView {{
             border: 2px solid {theme.BORDER_HEAVY_COLOR};
             border-radius: {theme.TOOLBAR_RADIUS}px;
         }}
@@ -375,22 +396,26 @@ def apply(theme: LightTheme = AccentColorDarkTheme):
         }}
 
 
-        QTreeView {{
+        QTreeView, QTableView {{
             alternate-background-color: {theme.TABLE_ROW_ALTERNATE_BACKGROUND};
             color: {theme.TABLE_ROW_FONT_COLOR};
         }}
 
-        QTreeView::item:hover {{
+        QTableView QTableCornerButton::section {{
+            background-color: {theme.TABLE_HEAD_BACKGROUND_COLOR};
+        }}
+
+        QTreeView::item:hover, QTableView::item:hover {{
             background-color: {theme.HOVER_BACKGROUND};
             color: {theme.HOVER_FONT_COLOR};
         }}
 
-        QTreeView::item:selected {{
+        QTreeView::item:selected, QTableView::item:selected {{
             background-color: {theme.SELECTION_BG_COLOR};
             color: {theme.SELECTION_FONT_COLOR};
         }}
 
-        QTreeView::item:active {{
+        QTreeView::item:active, QTableView::item:selected {{
             outline: none;
         }}
 

@@ -76,7 +76,7 @@ class TreeViewTable(QObject):
     def __init__(self):
         super().__init__()
 
-        self.folderIcon = QIcon( QIcon_from_svg('folder-outline', QApplication.instance().ThemeColors.FONT_COLOR) )
+        self.folderIcon = QIcon_from_svg('folder-outline', QApplication.instance().ThemeColors.FONT_COLOR)
         # self.fileIcon = QIcon( QIcon_from_svg('file.svg', QApplication.instance().ThemeColors.FONT_COLOR) )
         self.tree = QTreeWidget()
         self.tree.setColumnWidth(0,500)
@@ -88,7 +88,7 @@ class TreeViewTable(QObject):
         self.tree.setRootIsDecorated(True)
         self.tree.setSelectionBehavior(self.tree.SelectionBehavior.SelectRows)
         self.tree.setAlternatingRowColors(True)
-        # self.tree.setSortingEnabled(True)
+
 
         if mouse_pressed != None:
             self.tree.setDragEnabled( True )
@@ -181,19 +181,13 @@ class TreeViewTable(QObject):
 
     def addItems(self, parent, items, callback=lambda _: 0):
         if not items:
-            return None # []
+            return None
 
         items.sort(key=self.sortByType, reverse=True)
-
-        # res: List[CustomQTreeWidgetItem] = []
 
         for item in items:
             try:
                 treeitem = CustomQTreeWidgetItem(parent)
-                # res.append(treeitem)
-                # treeitem.setTextAlignment( 1, 2 )
-                # treeitem.setTextAlignment( 2, 2 )
-                # treeitem.setTextAlignment( 3, 2 )
                 treeitem.setJSONData(item)
 
                 self.setWidgetItemText(treeitem, item)
@@ -206,9 +200,6 @@ class TreeViewTable(QObject):
 
             except Exception as e:
                 print(e)
-                pass
-
-        # return res # Return the list of added items
 
 
     @staticmethod

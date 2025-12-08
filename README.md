@@ -8,7 +8,7 @@
 # Installation:
 
 ## Requirements
-Python 3.10+
+Python 3.11+
 
 ## How to install
 
@@ -62,21 +62,47 @@ Light and Dark themes: Improvments to the dark theme and new light theme
 
 Hooks can be disabled by clicking the Hook's name at the bottom right of the window
 
+## Custom hooks
+
 You can create your custom hooks to handle different file extensions. This tool provides the SCT to PNG and Webp loop hooks.
 
-To create a hook create a python file named after the extension/file format you want to handle. Inside this file you need to define a maind function with one argument
+To create a hook create a python file named after the extension/file format you want to handle. Inside this file you need to define a main function that takes only one argument
 
 ```
-def main(file):
+_ADDON_NAME_ = 'ATLAS' # The name of this hook, it will be displayed in the bottom right corner of the Asset Ripper
+_PREVENT_DEFAULT_ICON_ = True # Optional: default False. If set to True the icons in the bottom toolbar for this hook won't be created and displayed.
+
+
+from app.util.misc import FileDescriptor # only used for type hinting, you can skip this import
+
+# This is the main function and only thing required for the hooks to work. It will be called everytime a file extension matches this files name for example 'sct.py'
+def main(file: FileDescriptor):
   # the file argument is a class object
   content = file.bytes # -> This is a ByteArray which is a bytearray subclass with additional methods like seek, tell, read
   path = file.path # -> Destination path, set this to None if you want to prevent the default save function and handle it in your hook
   info = file.tree_file # -> The tree data
   thread = file.thread # -> You can check is_stopping() to check if the proccess was interrupted by the user or call progress((int, str)) NOTE: progress requires a tuple
   written = file.written # -> Check if the file has been written, this should be true if the hook is in the after_write folder
+
+# Optional
+def onEnabled():
+  # Do something to update the ui...
+  # this will be called only when switching from disabled to enabled, this function won't be called when the script is loaded
+
+# Optional
+def onDisabled():
+  # Called when this hook has been disabled by clicking the hook's name in the bottom toolbar of the tool
+  # it can be used to update the ui or the previewer
+
+# Optional
+def destroy():
+  # This function is only called if the refresh hooks button has been clicked and this script is no longer available in the hooks folder
+
 ```
 
-If you need to update the ui you should first check if the ui is loaded (the tool could be just a cmd or flask server) by checking modules:
+## Update UI
+
+If you need to update the ui you should first check if the ui is loaded:
 ```
 if 'PyQt6' in sys.modules:
   # The ui was initialized
@@ -90,6 +116,17 @@ else:
 
 For example the code above will create a new option in the settings tab
 
-Additionally you can have 2 optional methods: onEnabled and onDisabled. These methods are called when the hook is enabled or disabled and they can be used to update ui or cleanup
+`if 'PyQt6' in sys.modules:` is used to check if this tool is running as a GUI or not. `app = QApplication.instance()` returns None if the ui is not initialized.
 
+## Adding a preview type for a file extension
+You can add a preview type from the supported components [image, csv (tab), text] for a specific file type by calling the following function
+```
+from gui.components.preview import FileContentPreview
+FileContentPreview.setPreviewType('stc', 'image')
+```
 
+You can do the same to remove a preview type
+```
+from gui.components.preview import FileContentPreview
+FileContentPreview.deletePreviewType('stc')
+```

@@ -2,6 +2,7 @@ import importlib
 import sys
 import os
 import re
+from pathlib        import Path
 from types          import ModuleType
 from typing         import Literal, TYPE_CHECKING
 import traceback
@@ -91,7 +92,7 @@ class HookClass:
         return setattr(self, '_is_enabled', value)
 
     def get_has_icon(self):
-        return getattr(self.module, '_PREVENT_DEFAULT_ICON_', True) != True
+        return getattr(self.module, '_PREVENT_DEFAULT_ICON_', False) != True
 
     def exec(self, *args, **kwargs):
         try:
@@ -128,6 +129,10 @@ def load_hooks(gui_create=None):
     cfile_path = os.path.split(__file__)[0]
     errors = 0
     success = 0
+
+    # Create folders if missing
+    Path( cfile_path, 'hooks', 'before_write').mkdir(parents=True, exist_ok=True)
+    Path( cfile_path, 'hooks', 'after_write').mkdir(parents=True, exist_ok=True)
 
     try:
         for hook in ['before', 'after']:
@@ -166,7 +171,7 @@ def load_hooks(gui_create=None):
                         continue
 
                     hooks[hook][ext] = plugin
-                    if gui_create:
+                    if gui_create and plugin.get_has_icon():
                         gui_create(plugin)
 
                     success+=1

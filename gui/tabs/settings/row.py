@@ -1,5 +1,6 @@
-from PyQt6.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QComboBox, QFileDialog
-from PyQt6.QtCore      import Qt
+from PyQt6.QtWidgets        import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QComboBox, QFileDialog
+from PyQt6.QtCore           import Qt
+from PyQt6.QtGui            import QFont
 from gui.components.switch  import AnimatedToggle
 from gui.components.button  import Button
 
@@ -21,15 +22,19 @@ class SettingsRow(QWidget):
         description_layout = QVBoxLayout()
         text_wrapper.setLayout(description_layout)
 
+        title_font = QFont()
+        title_font.setPointSize(12)
+        title_font.setBold(True)
+
         title_label = QLabel(self)
         title_label.setText(title)
-        title_label.setObjectName('title')
+        title_label.setFont(title_font)
         description_layout.addWidget(title_label)
 
         description_label = QLabel(self)
         description_label.setText(description)
+        description_label.setWordWrap(True)
         description_layout.addWidget(description_label)
-
 
 
         option_wrapper = QWidget(self)
@@ -39,8 +44,6 @@ class SettingsRow(QWidget):
         option_wrapper.layout().setAlignment(option_widget, Qt.AlignmentFlag.AlignRight)
         layout.addWidget(option_wrapper)
         option_wrapper.setMaximumWidth(200)
-
-
 
         layout.setStretchFactor(option_wrapper, 0)
 

@@ -6,7 +6,7 @@ from gui.tabs.settings.default_options import OPTIONS
 from app.strings import translate
 
 class CreateTab(QWidget):
-    order = 0
+    order = 98
     def __init__(self, parent: QWidget | QApplication):
         super().__init__(parent)
         self.name = translate('settings')

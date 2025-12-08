@@ -20,11 +20,9 @@ class AppMainWindow(QMainWindow):
         app.setProperty('MainWindow', self)
 
 
-        # self.get_progress_bar_window()
         app.setProperty('GetProgressBarWindow', self.get_progress_bar_window)
 
         self.setWindowTitle(f'{translate("app_name")} v{VERSION}')
-        # self.setWindowIcon(QIcon("./gui/assets/icon.png"))
         self.resize(900, 700)
 
         self.PluginToolbar = PuginToolbar(self)

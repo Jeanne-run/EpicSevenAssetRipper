@@ -3,7 +3,10 @@ from PyQt6.QtCore      import pyqtSignal, Qt, QEvent
 from gui.util.svg_icon import QIcon_from_svg
 
 class SearchBar(QWidget):
+    # Emits only after the Enter key is pressed
     search = pyqtSignal(str)
+    # Emits after each key press
+    typing = pyqtSignal(str)
 
     def __init__(self, parent=None, placeholder=None):
         super().__init__(parent)
@@ -36,10 +39,17 @@ class SearchBar(QWidget):
 
 
     def eventFilter(self, obj, event): # CHeck if enter was pressed
-        if event.type() == QEvent.Type.KeyPress and event.key() == Qt.Key.Key_Return.value: # and obj is self.input_field 
-            self._emit_change()
+        if event.type() == QEvent.Type.KeyPress: # and obj is self.input_field 
+            if event.key() == Qt.Key.Key_Return.value:
+                self._emit_change()
+            else:
+                self.typing.emit(self.getValue())
+        
         return super().eventFilter(obj, event)
-    
+
+    def set_focus(self):
+        self.input_field.setFocus()
+
     # Internal call/connect
     def _emit_change(self):
         self.search.emit(self.getValue())

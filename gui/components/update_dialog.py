@@ -1,65 +1,51 @@
+from PyQt6.QtCore      import QCoreApplication, Qt
+from PyQt6.QtWidgets   import QWidget, QLabel, QPushButton, QSizePolicy
+from PyQt6.QtGui       import QFont
+
 from app.constants     import VERSION
 from .dialog_window    import ScrollableDialogWindow
-from .progress_bar.ProgressBar_ui import Progress
-from .progress_bar.ProgressBar import ProgressBar as ProgressBarDialog
-
-from PyQt6.QtCore      import QCoreApplication
-from PyQt6.QtWidgets   import QWidget, QLabel, QPushButton
-from PyQt6.QtGui       import QFont
-from app.update        import download_update
-
+from .button           import Button
+from app.update        import download_update, update_check, unpack_update
+from ..util.threads    import ThreadPool, Worker
+from app.strings       import translate
 
 import datetime
 
 class UpdateDialog(ScrollableDialogWindow):
     download_link: str = None
 
-    def __init__(self, parent=None, versions = []):
-        super().__init__(parent, window_title='Version Updater')
+    def __init__(self, parent=None):
+        super().__init__(parent, title=translate('version_update_title'))
 
-        self.setFixedSize(450, 500)
-        
-        font_title = QFont()
-        font_title.setPixelSize(18)
-        font_title.setBold(True)
+        self.check_for_updates()
 
-        if len(versions) > 0:
-            self.download_link = versions[0]['url'][0]
+        self.show()
 
-            l = QLabel(self)
-            l.setText(f"Current Version {VERSION}\nLatest: {versions[0]['version']}")
-            self.addWidget(l)
+    def check_for_updates(self):
+        self.checking_for_updates_view()
+        checker = Worker(update_check)
+        checker.signals.result.connect(self.update_checker_done)
+        ThreadPool.start(checker)
 
-            for version in versions:
-                l = QLabel(self)
-                l.setText(f"{version['version']} - {datetime.datetime.fromisoformat(version['date']).strftime('%d %b %Y %H:%M')}")
-                l.setFont(font_title)
-                self.addWidget(l)
-
-                l = QLabel(self)
-                l.setText(version['changelog'])
-                self.addWidget(l)
+    def update_checker_done(self, args, result: list | None):
+        if result is None:
+            self.no_update_found_view()
+        elif len(result) == 0:
+            self.no_update_found_view()
         else:
-                l = QLabel(self)
-                l.setText('You have the latest version available!')
-                self.addWidget(l)
+            self.download_link = result[0]['zip_source']
+            self.update_changelog_view(result)
 
-        if len(versions) > 0:
-            close_btn = QPushButton(self)
-            close_btn.setText('Download Update')
-            close_btn.clicked.connect(self.start_update_download)
-            self.addWidget(close_btn)
+    def download_and_apply_patch(self):
+        download_update(self.download_link)
+        unpack_update()
 
-        close_btn = QPushButton(self)
-        close_btn.setText('Close')
-        close_btn.clicked.connect(self.close)
-        self.addWidget(close_btn)
-
-    def clear_view(self):
-        for item in self.widget.children():
-            if item == self.main_content_area: continue
-
-            self.main_content_area.removeWidget(item)
+    def start_update_download(self):
+        self.checking_for_updates_view()
+        downloader = Worker(self.download_and_apply_patch)
+        downloader.signals.result.connect(self.download_complete_view)
+        downloader.signals.error.connect(self.download_error_view)
+        ThreadPool.start(downloader)
 
     def restart_now(self):
         import os
@@ -72,27 +58,106 @@ class UpdateDialog(ScrollableDialogWindow):
         app.quit()
         os.execv(sys.executable, ['python'] + sys.argv)
 
-    def start_update_download(self):
-        self.clear_view()
 
-        bar = Progress(self.widget, can_cancel=False)
-        bar.setValue(66)
-        bar.setLabel('Downloading update')
-        download_update(self.download_link)
-        self.clear_view()
-        self.download_complete_view()
 
-    def download_complete_view(self):
+
+    def clear_view(self):
+        self.clear_header()
+        self.clear_body()
+        self.clear_footer()
+
+    def checking_for_updates_view(self):
+        self.clear_view()
         l = QLabel(self)
-        l.setText('Download complete, the patch will be applied after restart!')
-        self.addWidget(l)
+        l.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        l.setText(translate('update_checking'))
+        self.body.layout().addWidget(l)
 
-        restart_btn = QPushButton(self)
-        restart_btn.setText('Restart now')
-        restart_btn.clicked.connect(self.restart_now)
-        self.addWidget(restart_btn)
+    def no_update_found_view(self):
+        self.clear_view()
+        l = QLabel(self)
+        l.setText(translate('current_is_latest_version'))
+        self.body.layout().addWidget(l)
+        self.body.layout().setAlignment(l, Qt.AlignmentFlag.AlignCenter)
 
         close_btn = QPushButton(self)
-        close_btn.setText('Close')
+        close_btn = Button(self, translate('close'), pointer = True)
         close_btn.clicked.connect(self.close)
-        self.addWidget(close_btn)
+        self.footer.layout().addWidget(close_btn)
+
+    def update_changelog_view(self, versions = []):
+        self.clear_view()
+
+        font_title = QFont()
+        font_title.setPixelSize(18)
+        font_title.setBold(True)
+
+        l = QLabel(self)
+        l.setText(translate('version_update_info').format(VERSION, versions[0]['version']))
+        self.header.layout().addWidget(l)
+
+        self.body.layout().setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.layout().setSpacing(10)
+
+        for version in versions:
+            l = QLabel(self)
+            l.setText(f"⦿ {version['version']} - {datetime.datetime.fromisoformat(version['date']).strftime('%d %b %Y %H:%M')}")
+            l.setFont(font_title)
+            self.body.layout().addWidget(l)
+
+            l = QLabel(self)
+            l.setText(version['changelog'])
+            l.setWordWrap(True)
+            l.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+            l.setContentsMargins(25,0,0,0)
+            self.body.layout().addWidget(l)
+
+        if self.download_link:
+            update_btn = Button(self, translate('update_download'), pointer = True)
+            update_btn.clicked.connect(self.start_update_download)
+            self.footer.layout().addWidget(update_btn)
+
+        close_btn = Button(self, translate('close'), pointer = True)
+        close_btn.clicked.connect(self.close)
+        self.footer.layout().addWidget(close_btn)
+
+        self.setMinimumHeight(400)
+
+    def downloading_update_view(self):
+        self.clear_view()
+        l = QLabel(self)
+        l.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        l.setText(translate('update_downloading_info'))
+        self.body.layout().addWidget(l)
+
+    def download_complete_view(self):
+        self.clear_view()
+        l = QLabel(self)
+        l.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        l.setText(translate('update_download_complete'))
+        self.body.layout().addWidget(l)
+
+        restart_btn = Button(self, translate('restart_now'), pointer = True)
+        restart_btn.clicked.connect(self.restart_now)
+        self.footer.layout().addWidget(restart_btn)
+
+        close_btn = QPushButton(self)
+        close_btn = Button(self, translate('restart_later'), pointer = True)
+        close_btn.clicked.connect(self.close)
+        self.footer.layout().addWidget(close_btn)
+
+    def download_error_view(self):
+        self.clear_view()
+        l = QLabel(self)
+        l.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        l.setText(translate('update_download_error'))
+        self.body.layout().addWidget(l)
+
+        restart_btn = Button(self, translate('retry'), pointer = True)
+        restart_btn.clicked.connect(self.start_update_download)
+        self.footer.layout().addWidget(restart_btn)
+
+        close_btn = QPushButton(self)
+        close_btn = Button(self, translate('close'), pointer = True)
+        close_btn.clicked.connect(self.close)
+        self.footer.layout().addWidget(close_btn)

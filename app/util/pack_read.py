@@ -44,7 +44,7 @@ class BasePackIO:
 
     def get_file_content(self, file: FileType):
         '''
-            Given a file returns that files content in bytes
+            Given a file returns that file's content in bytes
         '''
         self.mmap.seek(file['offset'])
 

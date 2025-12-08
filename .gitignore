@@ -6,8 +6,8 @@
 .idea/
 .git/
 
-app/hooks/after_write/
-app/hooks/before_write/
+app/hooks/after_write/**
+app/hooks/before_write/**
 data.pack/
 crash-report.txt
 settings.ini

@@ -35,10 +35,21 @@ def changed(val):
 if 'PyQt6' in sys.modules:
     from PyQt6.QtWidgets import QApplication, QWidget
     app = QApplication.instance()
-    add_setting = app.property('CreateSetting')
+    if app:
+        add_setting = app.property('CreateSetting')
 
-    if add_setting:
-        widget: QWidget = add_setting(title=f'[<b>{_ADDON_NAME_}</b>] SCT as image format', description='', value=SCT_AS_IMGAE_FORMAT, type='checkbox', options=[], onchanged=changed)
+        if add_setting:
+            widget: QWidget = add_setting(title=f'[<b>{_ADDON_NAME_}</b>] SCT as image format', description='Include .sct files when using the "Extract images only" option in the tree view.', value=SCT_AS_IMGAE_FORMAT, type='checkbox', options=[], onchanged=changed)
+
+def onEnabled():
+    if 'PyQt6' in sys.modules:
+        from gui.components.preview import FileContentPreview
+        FileContentPreview.setPreviewType('sct', 'image')
+def onDisabled():
+    if 'PyQt6' in sys.modules:
+        from gui.components.preview import FileContentPreview
+        FileContentPreview.deletePreviewType('sct')
+onEnabled()
 
 def destroy():
     global widget
@@ -116,7 +127,7 @@ def main(file: FileDescriptor):
             case 47:
                 image_data = decode_astc(data, width, height, 8, 8)
             case _:
-                raise Exception(f'Unknown SCT2 byte format for file {file.tree_file["full_path"]} byte format f{byte_format}')
+                raise Exception(f'Unknown SCT2 byte format for file {info["full_path"]} byte format f{byte_format}')
         
         image = PIL.Image.frombytes('RGBA', (width, height), image_data, 'raw', 'BGRA')
     else:
@@ -131,7 +142,7 @@ def main(file: FileDescriptor):
                 image = PIL.Image.frombytes('L', (width, height), data)
 
             case _: 
-                raise Exception(f'Unknown SCT byte format for file {file.tree_file["full_path"]} byte format {byte_format}')
+                raise Exception(f'Unknown SCT byte format for file {info["full_path"]} byte format {byte_format}')
 
 
     if dest_path is None:
@@ -150,8 +161,7 @@ def main(file: FileDescriptor):
 
 def pil_image_RGB16_A(data, width, height):
     img   = PIL.Image.frombytes('RGB', (width, height), data, 'raw', 'BGR;16', 0, 1)
-    alpha = PIL.Image.new('L', img.size, 255)
-    alpha.putdata(data[-width*height:])
+    alpha = PIL.Image.frombytes('L', (width, height), data[-width*height:])
     img.putalpha(alpha)
     return img
 

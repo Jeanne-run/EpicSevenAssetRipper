@@ -1,6 +1,8 @@
 from app     import settings
 from .styles import DarkTheme, LightTheme, RoundedLightTheme, RoundedDarkTheme, AccentColorDarkTheme, apply
 
+USE_THEME = DarkTheme
+
 THEMES = [
     'light',
     'light-r',
@@ -22,10 +24,11 @@ def get_theme_scheme(value: str):
         case 'dark-accent':
             return AccentColorDarkTheme
         case _:
-            return AccentColorDarkTheme
+            return RoundedDarkTheme
 
 def use_theme(app, val=settings.getTheme()):
-    theme = get_theme_scheme(val)
+    global USE_THEME
+    USE_THEME = get_theme_scheme(val)
 
-    app.ThemeColors = theme
-    app.setStyleSheet(apply(theme))
+    app.ThemeColors = USE_THEME
+    app.setStyleSheet(apply(USE_THEME))

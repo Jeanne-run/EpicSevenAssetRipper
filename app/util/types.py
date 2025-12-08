@@ -1,18 +1,18 @@
-from typing import TypedDict, Optional, List, Union
+from typing import TypedDict, Optional, List
 
 try:
-    from typing import LiteralString, Self
+    from typing import Self, Literal
 except ImportError:
     # Python <3.11 fallback definitions
-    LiteralString = str
     try:
-        from typing_extensions import Self
+        from typing_extensions import Self, Literal
     except ImportError:
         Self = None  # or just object
+        Literal = None
 
 
 class FileType(TypedDict):
-    type: LiteralString = 'file'
+    type: Literal['file']
     name: str
     full_path: str
     format: str
@@ -21,7 +21,7 @@ class FileType(TypedDict):
     extra_bytes: Optional[List[int]]
 
 class FolderType(TypedDict):
-    type: LiteralString = 'folder'
+    type: Literal['folder']
     name: str
     size: int
     files: int

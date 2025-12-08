@@ -55,7 +55,8 @@ class CreateTab(QWidget):
 
         main_widget = QWidget()
         main_widget.setLayout(QHBoxLayout())
-        main_widget.layout().setSpacing(0)
+        main_widget.layout().setSpacing(5)
+        main_widget.layout().setContentsMargins(0,4,0,0)
 
 
         tree = TreeViewTable()
@@ -63,13 +64,14 @@ class CreateTab(QWidget):
         tree.setColumns([translate('name'), translate('type'), translate('size'), f'{translate("files_in_folder")} / {translate("offset")}'])
         tree.setDictToColumn( self.tree_file_to_column )
         tree.dargdrop.connect(self._extract_sync)
-        tree.tree.customContextMenuRequested.connect(self.tree_context_menu)
+        tree.widget().customContextMenuRequested.connect(self.tree_context_menu)
+        tree.widget().itemDoubleClicked.connect(self.doubleClickTreeItemToPreview)
+        tree.widget().currentItemChanged.connect(self.automaticFilePreview)
         main_widget.layout().addWidget(tree.widget(), stretch=1)
 
         preview = FileContentPreview()
         preview.setVisible(False)
         self.previewWidget = preview
-        tree.widget().itemSelectionChanged.connect(self.automaticFilePreview)
         main_widget.layout().addWidget(preview, stretch=1)
 
         
@@ -163,23 +165,27 @@ class CreateTab(QWidget):
         self.disable_if_no_tree.append(self.search_bar)
         buttons_line.addWidget(self.search_bar)
 
+    def doubleClickTreeItemToPreview(self, item: CustomQTreeWidgetItem):
+        if item.childCount() == 0:
+            self.showTreeItemPreview(item)
+
     def automaticFilePreview(self):
         if getAutomaticFilePreview() == True:
-            self.showPreviewItem()
+            self.showTreeItemPreview(self.tree.tree.currentItem())
 
-    def showPreviewItem(self):
-        items: list[CustomQTreeWidgetItem] = self.tree.widget().selectedItems()
-        if len(items) > 0:
-            file = items[0].getJSONData()
-            format_ = file.get('format')
+    def showTreeItemPreview(self, item:CustomQTreeWidgetItem, windowed=False):
+        if item:
+            file = item.getJSONData()
+            is_supported = self.previewWidget.is_preview_supported( file.get('format') )
 
-            if format_ in IMG_FORMATS:
-                content = get_file(file, pack=self.pack)
-                self.previewWidget.display('image', content)
-                self.previewWidget.setVisible(True)
-            else:
-                self.previewWidget.setVisible(False)
-                
+            if not is_supported:
+                return self.previewWidget.setHidden(True)
+
+            self.previewWidget.display(
+                file,
+                lambda: get_file(file, pack=self.pack),
+                windowed=windowed
+            )
 
 
     def errorWindow(self, title, message):
@@ -229,8 +235,7 @@ class CreateTab(QWidget):
 
     def tree_context_menu(self, position):
         options = [
-            [translate('extract'), self.extract_selected_only],
-            [translate('preview'), self.showPreviewItem]
+            [translate('extract'), self.extract_selected_only]
         ]
         currItem: CustomQTreeWidgetItem = self.tree.tree.currentItem()
 
@@ -238,6 +243,10 @@ class CreateTab(QWidget):
             data = currItem.getJSONData()
 
             file_extension = data.get('format', None)
+
+            if self.previewWidget.is_preview_supported(file_extension):
+                options.append(['Preview', lambda: self.showTreeItemPreview(currItem)])
+                options.append(['Preview (Windowed)', lambda: self.showTreeItemPreview(currItem, windowed=True)])
 
             if file_extension in IMG_FORMATS:
                 options.append(['View Image', lambda: self.view_image(data)])
